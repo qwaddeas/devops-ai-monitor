@@ -1,0 +1,43 @@
+KEYWORDS = {
+    "critical": [
+        "database down",
+        "connection refused",
+        "out of memory",
+        "kernel panic",
+    ],
+    "error": [
+        "exception",
+        "error",
+        "failed",
+        "timeout",
+    ],
+    "warning": [
+        "warning",
+        "deprecated",
+        "slow",
+    ],
+}
+
+RECOMMENDATIONS = {
+    "critical": "Check service availability and infrastructure immediately.",
+    "error": "Inspect application logs and recent deployments.",
+    "warning": "Monitor the service and investigate the warning.",
+    "info": "No action required.",
+}
+
+def analyze_log(message: str) -> dict:
+    text = message.lower()
+
+    for level, keywords in KEYWORDS.items():
+        if any(keyword in text for keyword in keywords):
+            return {
+                "level": level,
+                "confidence": 0.95,
+                "recommendation": RECOMMENDATIONS[level],
+            }
+
+    return {
+        "level": "info",
+        "confidence": 0.80,
+        "recommendation": RECOMMENDATIONS["info"],
+    }

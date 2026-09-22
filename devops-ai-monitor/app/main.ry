@@ -1,0 +1,44 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from prometheus_fastapi_instrumentator import Instrumentator
+
+from app.analyzer import analyze_log
+
+app = FastAPI(
+    title="DevOps AI Monitor",
+    description="Small log analysis and monitoring service",
+    version="1.0.0",
+)
+
+Instrumentator().instrument(app).expose(app)
+
+class LogEvent(BaseModel):
+    service: str
+    message: str
+
+@app.get("/")
+async def root():
+    return {
+        "service": "devops-ai-monitor",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health",
+        "metrics": "/metrics",
+    }
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "service": "devops-ai-monitor",
+    }
+
+"/analyze"
+async def analyze(event: LogEvent):
+    result = analyze_log(event.message)
+
+    return {
+        "service": event.service,
+        "message": event.message,
+        "analysis": result,
+    }
